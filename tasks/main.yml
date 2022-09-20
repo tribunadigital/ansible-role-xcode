@@ -8,11 +8,6 @@
   set_fact:
     xcode_installed: "{{ xcode_app.stdout.find('Xcode') != -1 }}"
 
-- name: Set Xcode command line tools path if Xcode is installed
-  become: true
-  shell: xcode-select -s "{{ xcode_app.stdout }}"
-  when: xcode_installed
-
 - name: Get Installed Xcode version
   shell: xcodebuild -version | head -n1 | cut -d " " -f 2
   register: xcode_app_output
@@ -72,3 +67,16 @@
   developer_mode:
     state: enable
   become: true
+
+- name: Again check if Xcode is installed
+  command: mdfind -onlyin /Applications "kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'"
+  register: xcode_app_again
+  changed_when: false
+  check_mode: no
+
+- name: Set Xcode command line tools path if Xcode is installed
+  become: true
+  shell: xcode-select -s "{{ xcode_app_again.stdout }}"
+  changed_when: false
+  check_mode: no
+
