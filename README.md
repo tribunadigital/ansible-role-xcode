@@ -25,9 +25,9 @@ You can find all default variables in [`defaults/main.yml`](defaults/main.yml)
 
 The Xcode xip location on the target computer.
 
-    xcode_major_version:
+    xcode_full_version:
 
-The major Xcode version to be installed. The way extra packages are installed varies between Xcode versions. That is why the major version must be known when running the provisioning scripts.
+The full Xcode version to be installed.
 
     xcode_build: /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild
 
@@ -50,8 +50,8 @@ None.
 
     - hosts: localhost
       vars:
-        xcode_xip_location: '/Users/user/Downloads/Xcode_10.1.xip'
-        xcode_major_version: 10
+        xcode_xip_location: '/Users/user/Downloads/Xcode_14.2.xip'
+        xcode_full_version: 14.2
       roles:
         - xcode
 

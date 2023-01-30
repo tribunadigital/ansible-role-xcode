@@ -37,17 +37,27 @@
         pkgutil --check-signature {{ xcode_xip_location }} |
         grep \"Status: signed Apple Software\"
 
-    - name: Clean up existing Xcode installation
+    - name: Create temporary diretory of Xcode instalattion
       file:
-        path: /Applications/Xcode.app
-        state: absent
+        path: "/Applications/Xcode.app.{{ xcode_full_version }}"
+        state: directory
 
-    - name: Install Xcode from XIP file Location
+    - name: Install Xcode from XIP file Location to temporary diretory
       command: xip --expand {{ xcode_xip_location }}
       args:
-        chdir: /Applications
+        chdir: "/Applications/Xcode.app.{{ xcode_full_version }}"
       poll: 5
       async: "{{ xcode_xip_extraction_timeout }}" # Prevent SSH connections timing out waiting for extraction
+
+    - name: Move old xcode to tarsh
+      command: mv /Applications/Xcode.app /Applications/Xcode.app.trash
+      args:
+        chdir: /Applications
+
+    - name: "Move xcode {{ xcode_full_version }} to /Applications directory"
+      command: "mv /Applications/Xcode.app.{{ xcode_full_version }}/Xcode.app /Applications/"
+      args:
+        chdir: /Applications
 
     - name: Accept License Agreement
       command: "{{ xcode_build }} -license accept"
@@ -56,11 +66,17 @@
     - name: Run Xcode first launch
       command: "{{ xcode_build }} -runFirstLaunch"
       become: true
-      when: xcode_major_version | int >= 9
 
-    - name: Xcode 8 packages
-      include: xcode8_packages.yml
-      when: xcode_major_version | int == 8
+    - name: Clean up temporary diretory of Xcode installation
+      file:
+        path: "/Applications/Xcode.app.{{ xcode_full_version }}"
+        state: absent
+
+    - name: Clean up trash diretory of trash Xcode
+      file:
+        path: /Applications/Xcode.app.trash
+        state: absent
+
   when: not xcode_installed or xcode_installed_version is version(xcode_target_version, '!=')
 
 - name: Enable Developer Mode
