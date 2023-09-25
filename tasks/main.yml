@@ -86,6 +86,7 @@
 
 - name: Again check if Xcode is installed
   command: mdfind -onlyin /Applications "kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'"
+  become: true
   register: xcode_app_again
   changed_when: false
   check_mode: no
